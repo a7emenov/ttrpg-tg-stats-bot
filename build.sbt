@@ -10,6 +10,9 @@ lazy val root = (project in file("."))
 
 lazy val service = (project in file("service"))
   .settings(
-    name := "service"
+    name := "service",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % "2.13.0"
+    )
   )
 
