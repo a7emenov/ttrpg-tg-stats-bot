@@ -1,8 +1,11 @@
-package com.github.a7emenov.domain
+package com.github.a7emenov.domain.game
+
+import com.github.a7emenov.domain.user.User
 
 /** Represents a participant in a given game session.
  *  Participants are recorded by their username which may change over time
  *  and is stored only for display purposes. Username
+ *
  *  @param username - participant's username which should be unique within a game session.
  *  @param id - Telegram identifier corresponding to the username.
  */

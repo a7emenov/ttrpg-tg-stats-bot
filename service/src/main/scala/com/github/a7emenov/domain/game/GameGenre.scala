@@ -1,4 +1,4 @@
-package com.github.a7emenov.domain
+package com.github.a7emenov.domain.game
 
 opaque type GameGenre = String
 

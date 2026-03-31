@@ -1,4 +1,4 @@
-package com.github.a7emenov.domain
+package com.github.a7emenov.domain.game
 
 import java.time.{LocalDate, LocalDateTime}
 import java.time.temporal.ChronoUnit
@@ -9,11 +9,10 @@ import scala.concurrent.duration.FiniteDuration
 import cats.data.NonEmptyList
 import cats.syntax.option.*
 
-/**
- * A representation of a recorded game session. 
- * Some root fields are optional to indicate whether they were provided by the user.
- * Session are not intended to be recorded without non-optional fields.
- * @param id - an artificial unique identifier for a game session.
+/** A representation of a recorded game session.
+ *  Some root fields are optional to indicate whether they were provided by the user.
+ *  Session are not intended to be recorded without non-optional fields.
+ *  @param id - an artificial unique identifier for a game session.
  */
 case class GameSession(
     id: GameSession.Id,
