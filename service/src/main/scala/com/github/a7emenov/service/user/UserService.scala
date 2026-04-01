@@ -1,5 +1,6 @@
 package com.github.a7emenov.service.user
 
+import cats.effect.Sync
 import com.github.a7emenov.domain.user.User
 import cats.syntax.option.*
 import cats.syntax.show.*
@@ -11,6 +12,9 @@ trait UserService[F[_]]:
   def get(id: User.Id): F[Either[UserService.Error.Get, Option[User]]]
 
 object UserService:
+
+  def make[F[_]: Sync]: F[UserService[F]] =
+    UserServiceInMemory.make
 
   sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
 

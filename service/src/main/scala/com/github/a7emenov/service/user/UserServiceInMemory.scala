@@ -1,7 +1,7 @@
 package com.github.a7emenov.service.user
 
 import cats.Functor
-import cats.effect.Ref
+import cats.effect.{Ref, Sync}
 import com.github.a7emenov.domain.user.User
 import com.github.a7emenov.domain.user.User.Id
 import cats.syntax.either.*
@@ -23,3 +23,8 @@ class UserServiceInMemory[F[_]: Functor](ref: Ref[F, Map[User.Id, User]]) extend
     ref.get.map { map =>
       map.get(id).asRight
     }
+
+object UserServiceInMemory:
+
+  def make[F[_]: Sync]: F[UserService[F]] =
+    Ref.of(Map.empty[User.Id, User]).map(UserServiceInMemory(_))

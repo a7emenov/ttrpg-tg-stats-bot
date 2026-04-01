@@ -18,8 +18,10 @@ lazy val service = (project in file("service"))
   .settings(
     name := "service",
     libraryDependencies ++= Seq(
+      Dependencies.bot4sTelegramCore,
       Dependencies.cats,
-      Dependencies.catsEffect
+      Dependencies.catsEffect,
+      Dependencies.sttp4
     )
   )
 
