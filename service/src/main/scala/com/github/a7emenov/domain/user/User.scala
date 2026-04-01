@@ -1,5 +1,6 @@
 package com.github.a7emenov.domain.user
 
+import cats.Show
 import com.github.a7emenov.domain.game.SessionParticipant
 import com.github.a7emenov.domain.user.User
 
@@ -17,6 +18,10 @@ object User:
   opaque type Id = String
 
   object Id:
+
+    implicit val show: Show[User.Id] =
+      Show.show(_.value)
+
     def apply(value: String): User.Id =
       value
 

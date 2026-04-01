@@ -18,7 +18,8 @@ lazy val service = (project in file("service"))
   .settings(
     name := "service",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.13.0"
+      Dependencies.cats,
+      Dependencies.catsEffect
     )
   )
 
