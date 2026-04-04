@@ -1,7 +1,7 @@
 package com.github.a7emenov
 
 import cats.effect.{ExitCode, IO, IOApp}
-import cats.effect.kernel.Resource
+import cats.effect.Resource
 import com.github.a7emenov.api.telegram.BotCommandHandler
 import com.github.a7emenov.process.user.UserProcess
 import com.github.a7emenov.service.user.UserService

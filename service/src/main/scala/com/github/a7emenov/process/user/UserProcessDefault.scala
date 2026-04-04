@@ -2,20 +2,18 @@ package com.github.a7emenov.process.user
 
 import scala.util.control.NonFatal
 
-import cats.Functor
-import cats.effect.{Ref, Resource, Sync}
-import cats.effect.kernel.MonadCancelThrow
-import com.github.a7emenov.domain.user.{User, UserRole}
-import com.github.a7emenov.process.user.UserProcess
-import com.github.a7emenov.service.user.UserService
-import cats.syntax.flatMap.*
-import cats.syntax.option.*
-import com.github.a7emenov.process.user
+import cats.effect.{MonadCancelThrow, Ref, Resource, Sync}
 import cats.syntax.applicative.*
 import cats.syntax.applicativeError.*
-import cats.syntax.functor.*
-import com.github.a7emenov.process.user.UserProcessDefault.*
 import cats.syntax.either.*
+import cats.syntax.flatMap.*
+import cats.syntax.functor.*
+import cats.syntax.option.*
+import com.github.a7emenov.domain.user.{User, UserRole}
+import com.github.a7emenov.process.user
+import com.github.a7emenov.process.user.UserProcess
+import com.github.a7emenov.process.user.UserProcessDefault.*
+import com.github.a7emenov.service.user.UserService
 
 class UserProcessDefault[F[_]: MonadCancelThrow](
     userService: UserService[F],

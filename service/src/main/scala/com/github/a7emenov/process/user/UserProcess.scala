@@ -1,10 +1,10 @@
 package com.github.a7emenov.process.user
 
-import cats.effect.{Ref, Resource, Sync}
-import com.github.a7emenov.domain.user.{User, UserRole}
-import com.github.a7emenov.process.user
+import cats.effect.{Resource, Sync}
 import cats.syntax.option.*
 import cats.syntax.show.*
+import com.github.a7emenov.domain.user.{User, UserRole}
+import com.github.a7emenov.process.user
 import com.github.a7emenov.service.user.UserService
 
 trait UserProcess[F[_]]:

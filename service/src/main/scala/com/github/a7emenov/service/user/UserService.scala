@@ -1,7 +1,7 @@
 package com.github.a7emenov.service.user
 
+import cats.effect.Resource
 import cats.effect.Sync
-import cats.effect.kernel.Resource
 import com.github.a7emenov.domain.user.{User, UserRole}
 import cats.syntax.option.*
 import cats.syntax.show.*

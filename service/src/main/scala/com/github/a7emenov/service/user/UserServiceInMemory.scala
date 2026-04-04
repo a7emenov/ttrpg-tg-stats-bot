@@ -2,7 +2,7 @@ package com.github.a7emenov.service.user
 
 import cats.Functor
 import cats.effect.{Ref, Sync}
-import cats.effect.kernel.Resource
+import cats.effect.Resource
 import com.github.a7emenov.domain.user.{User, UserRole}
 import cats.syntax.either.*
 import com.github.a7emenov.service.user.UserService.Error
