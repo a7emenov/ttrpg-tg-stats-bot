@@ -10,10 +10,17 @@ import com.github.a7emenov.domain.user.User
  *  @param id - registered Telegram identifier (not username).
  */
 case class User(
-    id: User.Id
+    id: User.Id,
+    permissions: Set[UserPermission]
 )
 
 object User:
+
+  def apply(id: User.Id, role: UserRole): User =
+    User(
+      id,
+      role.defaultPermissions
+    )
 
   opaque type Id = String
 
