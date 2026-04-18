@@ -11,7 +11,9 @@ trait UserApplicationService[F[_]]:
 
   def get(id: User.Id): F[Either[UserApplicationService.Error.Get, Option[UserApplication]]]
 
-  def list(chunkSize: Int): fs2.Stream[F, Either[UserApplicationService.Error.Get, List[UserApplication]]]
+  def getAll(chunkSize: Int): fs2.Stream[F, Either[UserApplicationService.Error.Get, List[UserApplication]]]
+
+  def delete(id: User.Id): F[Either[UserApplicationService.Error.Delete, Unit]]
 
 object UserApplicationService:
 
@@ -33,3 +35,12 @@ object UserApplicationService:
 
     object Get:
       case class System(message: String, cause: Throwable) extends UserApplicationService.Error.Get(message, cause.some)
+
+    sealed abstract class Delete(message: String, cause: Option[Throwable]) extends Error(message, cause)
+
+    object Delete:
+      case class NotFound(id: User.Id)
+          extends UserApplicationService.Error.Delete(show"Application for user $id not found", none)
+
+      case class System(message: String, cause: Throwable)
+          extends UserApplicationService.Error.Delete(message, cause.some)
