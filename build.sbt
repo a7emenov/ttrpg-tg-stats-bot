@@ -22,6 +22,7 @@ lazy val service = (project in file("service"))
       Dependencies.cats,
       Dependencies.catsEffect,
       Dependencies.fs2,
+      Dependencies.pureConfig,
       Dependencies.sttp4
     )
   )
