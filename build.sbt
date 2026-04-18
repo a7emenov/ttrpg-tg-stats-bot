@@ -21,6 +21,7 @@ lazy val service = (project in file("service"))
       Dependencies.bot4sTelegramCore,
       Dependencies.cats,
       Dependencies.catsEffect,
+      Dependencies.fs2,
       Dependencies.sttp4
     )
   )

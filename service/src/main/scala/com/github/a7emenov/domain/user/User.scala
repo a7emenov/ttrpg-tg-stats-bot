@@ -1,8 +1,6 @@
 package com.github.a7emenov.domain.user
 
 import cats.Show
-import com.github.a7emenov.domain.game.SessionParticipant
-import com.github.a7emenov.domain.user.User
 
 /** Represents a user registered to use the bot.
  *  All game session participants are represented by [[SessionParticipant]] instead.

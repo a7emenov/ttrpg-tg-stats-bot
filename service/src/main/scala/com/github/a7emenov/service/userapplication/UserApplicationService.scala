@@ -1,0 +1,35 @@
+package com.github.a7emenov.service.userapplication
+
+import cats.effect.{Resource, Sync}
+import cats.syntax.option.*
+import cats.syntax.show.*
+import com.github.a7emenov.domain.user.{User, UserApplication, UserRole}
+
+trait UserApplicationService[F[_]]:
+
+  def create(id: User.Id, role: UserRole): F[Either[UserApplicationService.Error.Create, UserApplication]]
+
+  def get(id: User.Id): F[Either[UserApplicationService.Error.Get, Option[UserApplication]]]
+
+  def list(chunkSize: Int): fs2.Stream[F, Either[UserApplicationService.Error.Get, List[UserApplication]]]
+
+object UserApplicationService:
+
+  def make[F[_]: Sync]: Resource[F, UserApplicationService[F]] =
+    UserApplicationServiceInMemory.make
+
+  sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
+
+  object Error:
+    sealed abstract class Create(message: String, cause: Option[Throwable]) extends Error(message, cause)
+
+    object Create:
+      case class AlreadyExists(id: User.Id)
+          extends UserApplicationService.Error.Create(show"User with id $id already exists", none)
+      case class System(message: String, cause: Throwable)
+          extends UserApplicationService.Error.Create(message, cause.some)
+
+    sealed abstract class Get(message: String, cause: Option[Throwable]) extends Error(message, cause)
+
+    object Get:
+      case class System(message: String, cause: Throwable) extends UserApplicationService.Error.Get(message, cause.some)
