@@ -10,14 +10,15 @@ import cats.syntax.show.*
 import com.bot4s.telegram.api.declarative.Commands
 import com.bot4s.telegram.cats.{Polling, TelegramBot}
 import com.github.a7emenov.domain.user.{User, UserPermission, UserRole}
+import com.github.a7emenov.domain.util.Secret
 import sttp.client4.Backend
 import com.github.a7emenov.process.user.UserProcess
 
 class BotCommandHandler[F[_]: Async](
-    token: String,
+    token: Secret,
     backend: Backend[F],
     userProcess: UserProcess[F]
-) extends TelegramBot[F](token, backend) with Polling[F] with Commands[F] {
+) extends TelegramBot[F](token.value, backend) with Polling[F] with Commands[F] {
 
   onCommand(BotCommand.Echo.name) { implicit command =>
     withArgs { args =>
@@ -28,8 +29,9 @@ class BotCommandHandler[F[_]: Async](
   onCommand(BotCommand.SetupAdmin.name) { implicit command =>
     withArgs { args =>
       val resultF = for {
-        setupToken <- EitherT.fromOption(args.headOption.map(UserProcess.SetupToken(_)), "provide a setup token")
-        userId     <-
+        setupToken <-
+          EitherT.fromOption(args.headOption.map(UserProcess.SetupToken.fromString), "provide a setup token")
+        userId <-
           EitherT.fromOption(command.from.map(user => User.Id(user.id.toString)), "command must be run by a user")
         result <- EitherT(userProcess.setupAdmin(userId, setupToken))
           .leftMap {

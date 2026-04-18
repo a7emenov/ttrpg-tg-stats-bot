@@ -6,5 +6,6 @@ object Dependencies {
   val cats = "org.typelevel" %% "cats-core" % Versions.cats
   val catsEffect = "org.typelevel" %% "cats-effect" % Versions.catsEffect
   val fs2 = "co.fs2" %% "fs2-core" % Versions.fs2
+  val pureConfig = "com.github.pureconfig" %% "pureconfig-core" % Versions.pureConfig
   val sttp4 = "com.softwaremill.sttp.client4" %% "cats" % Versions.sttp4
 }

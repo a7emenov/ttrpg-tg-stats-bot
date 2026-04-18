@@ -3,7 +3,9 @@ package com.github.a7emenov.process.user
 import cats.effect.{Resource, Sync}
 import cats.syntax.option.*
 import cats.syntax.show.*
+import com.github.a7emenov.config.process.UserProcessConfig
 import com.github.a7emenov.domain.user.{User, UserApplication, UserRole}
+import com.github.a7emenov.domain.util.Secret
 import com.github.a7emenov.process.user
 import com.github.a7emenov.service.user.UserService
 import com.github.a7emenov.service.userapplication.UserApplicationService
@@ -23,21 +25,24 @@ trait UserProcess[F[_]]:
 object UserProcess:
 
   def make[F[_]: Sync](
-      setupToken: UserProcess.SetupToken,
+      config: UserProcessConfig,
       userService: UserService[F],
       userApplicationService: UserApplicationService[F]
   ): Resource[F, UserProcess[F]] =
-    UserProcessDefault.make(setupToken, userService, userApplicationService)
+    UserProcessDefault.make(config.setupToken, userService, userApplicationService)
 
-  opaque type SetupToken = String
+  opaque type SetupToken = Secret
 
   object SetupToken:
 
-    def apply(value: String): UserProcess.SetupToken =
+    def fromString(value: String): UserProcess.SetupToken =
+      UserProcess.SetupToken(Secret(value))
+
+    def apply(value: Secret): UserProcess.SetupToken =
       value
 
     extension (token: UserProcess.SetupToken)
-      def value: String = token
+      def value: Secret = token
 
   sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
 
