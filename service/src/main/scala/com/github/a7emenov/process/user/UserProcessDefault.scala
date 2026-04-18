@@ -63,6 +63,10 @@ class UserProcessDefault[F[_]: MonadCancelThrow](
       _           <- deleteApplication(id)
     } yield user).value
 
+  def getUserApplications: fs2.Stream[F, Either[UserProcess.Error.Get, List[UserApplication]]] =
+    userApplicationService.getAll(chunkSize = 100)
+      .map(_.leftMap(toGetUserApplicationsError))
+
   override def get(id: User.Id): F[Either[UserProcess.Error.Get, Option[User]]] =
     userService.get(id)
       .map(_.leftMap(toGetError))
@@ -158,4 +162,10 @@ object UserProcessDefault:
     error match {
       case cause: UserService.Error.Get.System =>
         UserProcess.Error.Get.System("Unknown user service get error", cause)
+    }
+
+  private def toGetUserApplicationsError(error: UserApplicationService.Error.Get): UserProcess.Error.Get =
+    error match {
+      case cause: UserApplicationService.Error.Get.System =>
+        UserProcess.Error.Get.System("Unknown user application service get error", cause)
     }

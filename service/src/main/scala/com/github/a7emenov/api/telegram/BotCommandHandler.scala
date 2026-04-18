@@ -2,13 +2,15 @@ package com.github.a7emenov.api.telegram
 
 import cats.data.EitherT
 import cats.effect.Async
+import cats.syntax.applicativeError.*
+import cats.syntax.either.*
+import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.show.*
 import com.bot4s.telegram.api.declarative.Commands
 import com.bot4s.telegram.cats.{Polling, TelegramBot}
-import com.github.a7emenov.domain.user.User
+import com.github.a7emenov.domain.user.{User, UserPermission, UserRole}
 import sttp.client4.Backend
-import cats.syntax.flatMap.*
 import com.github.a7emenov.process.user.UserProcess
 
 class BotCommandHandler[F[_]: Async](
@@ -57,5 +59,95 @@ class BotCommandHandler[F[_]: Async](
     resultF
       .fold(identity, _.mkString(","))
       .flatMap(reply(_).void)
+  }
+
+  onCommand(BotCommand.Apply.name) { implicit command =>
+    withArgs { args =>
+      val resultF = for {
+        role <- EitherT.fromEither(args.headOption.map(_.toLowerCase()).fold(
+          "provide a role".asLeft
+        ) {
+          case "admin" => UserRole.Admin.asRight
+          case "scribe" => UserRole.Scribe.asRight
+          case "reader" => UserRole.Reader.asRight
+          case _ => "invalid user role".asLeft
+        })
+        userId <-
+          EitherT.fromOption(command.from.map(user => User.Id(user.id.toString)), "command must be run by a user")
+        result <- EitherT(userProcess.apply(userId, role))
+          .leftMap {
+            case _: UserProcess.Error.Apply.UserAlreadyExists => "user already exists"
+            case _: UserProcess.Error.Apply.ApplicationAlreadyExists => "application already exists"
+            case UserProcess.Error.Apply.System(message, _) => show"unknown error: $message"
+          }
+      } yield result
+
+      resultF
+        .fold(identity, _ => "application created successfully")
+        .flatMap(reply(_).void)
+    }
+  }
+
+  onCommand(BotCommand.ApproveUserApplication.name) { implicit command =>
+    withArgs { args =>
+      val resultF = for {
+        userId          <- EitherT.fromOption(args.headOption.map(User.Id(_)), "provide a user id")
+        commandRunnerId <-
+          EitherT.fromOption(command.from.map(user => User.Id(user.id.toString)), "command must be run by a user")
+        commandRunnerUser <- EitherT(userProcess.get(commandRunnerId))
+          .leftMap {
+            case UserProcess.Error.Get.System(message, _) => show"unknown error: $message"
+          }
+          .subflatMap {
+            case None => "user is not registered".asLeft
+            case Some(user) => user.asRight
+          }
+        result <- if commandRunnerUser.permissions.contains(UserPermission.InternalAccess) then
+          EitherT(userProcess.approveApplication(userId))
+            .leftMap {
+              case _: UserProcess.Error.ApproveApplication.NotFound => "application not found"
+              case UserProcess.Error.ApproveApplication.System(message, _) => show"unknown error: $message"
+            }
+        else
+          EitherT.leftT("user does not have permissions")
+      } yield result
+
+      resultF
+        .fold(identity, _ => "application approved successfully")
+        .flatMap(reply(_).void)
+    }
+  }
+
+  onCommand(BotCommand.ListUserApplications.name) { implicit command =>
+    withArgs { args =>
+      val resultF = for {
+        commandRunnerId <-
+          EitherT.fromOption(command.from.map(user => User.Id(user.id.toString)), "command must be run by a user")
+        commandRunnerUser <- EitherT(userProcess.get(commandRunnerId))
+          .leftMap {
+            case UserProcess.Error.Get.System(message, _) => show"unknown error: $message"
+          }
+          .subflatMap {
+            case None => "user is not registered".asLeft
+            case Some(user) => user.asRight
+          }
+        result <- if commandRunnerUser.permissions.contains(UserPermission.InternalAccess) then
+          EitherT(userProcess.getUserApplications
+            .rethrow
+            .compile
+            .toList
+            .map(_.flatten)
+            .redeem(
+              e => s"application retrieval error: ${e.getMessage}".asLeft,
+              _.mkString("(", ",", ")").asRight
+            ))
+        else
+          EitherT.leftT("user does not have permissions")
+      } yield result
+
+      resultF
+        .merge
+        .flatMap(reply(_).void)
+    }
   }
 }

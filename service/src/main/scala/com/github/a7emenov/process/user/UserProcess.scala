@@ -16,6 +16,8 @@ trait UserProcess[F[_]]:
 
   def approveApplication(id: User.Id): F[Either[UserProcess.Error.ApproveApplication, User]]
 
+  def getUserApplications: fs2.Stream[F, Either[UserProcess.Error.Get, List[UserApplication]]]
+
   def get(id: User.Id): F[Either[UserProcess.Error.Get, Option[User]]]
 
 object UserProcess:
