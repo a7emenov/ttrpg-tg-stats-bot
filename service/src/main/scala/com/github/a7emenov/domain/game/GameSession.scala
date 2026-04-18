@@ -12,14 +12,12 @@ import cats.syntax.option.*
 /** A representation of a recorded game session.
  *  Some root fields are optional to indicate whether they were provided by the user.
  *  Session are not intended to be recorded without non-optional fields.
- *  @param id - an artificial unique identifier for a game session.
  */
 case class GameSession(
-    id: GameSession.Id,
     genres: Option[NonEmptyList[GameGenre]],
     system: Option[GameSystem],
     gameType: Option[GameType],
-    host: SessionParticipant,
+    hosts: NonEmptyList[SessionParticipant],
     players: Option[GameSession.Players],
     timeframe: GameSession.Timeframe,
     storyArcData: Option[GameSession.StoryArcData],
@@ -28,6 +26,10 @@ case class GameSession(
 
 object GameSession:
 
+  case class WithId(id: GameSession.Id, session: GameSession)
+
+  /** An artificial unique identifier for a game session.
+   */
   opaque type Id = String
 
   object Id:
