@@ -24,8 +24,16 @@ class UserApplicationServiceInMemory[F[_]: Functor](ref: Ref[F, Map[User.Id, Use
       map.get(id).asRight
     }
 
-  def list(chunkSize: Int): fs2.Stream[F, Either[UserApplicationService.Error.Get, List[UserApplication]]] =
+  def getAll(chunkSize: Int): fs2.Stream[F, Either[UserApplicationService.Error.Get, List[UserApplication]]] =
     fs2.Stream.eval(ref.get.map(_.values.toList.asRight[UserApplicationService.Error.Get]))
+
+  def delete(id: User.Id): F[Either[UserApplicationService.Error.Delete, Unit]] =
+    ref.modify { map =>
+      if map.contains(id) then
+        (map.removed(id), ().asRight)
+      else
+        (map, UserApplicationService.Error.Delete.NotFound(id).asLeft)
+    }
 
 object UserApplicationServiceInMemory:
 

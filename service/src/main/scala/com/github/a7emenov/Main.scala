@@ -5,6 +5,7 @@ import cats.effect.Resource
 import com.github.a7emenov.api.telegram.BotCommandHandler
 import com.github.a7emenov.process.user.UserProcess
 import com.github.a7emenov.service.user.UserService
+import com.github.a7emenov.service.userapplication.UserApplicationService
 import sttp.client4.httpclient.cats.HttpClientCatsBackend
 
 object Main extends IOApp:
@@ -18,8 +19,9 @@ object Main extends IOApp:
 
   private def program: Resource[IO, BotCommandHandler[IO]] =
     for {
-      httpBackend <- HttpClientCatsBackend.resource()
-      userService <- UserService.make[IO]
-      userProgram <- UserProcess.make(userService, UserProcess.SetupToken(botToken))
+      httpBackend            <- HttpClientCatsBackend.resource()
+      userService            <- UserService.make[IO]
+      userApplicationService <- UserApplicationService.make[IO]
+      userProgram            <- UserProcess.make(UserProcess.SetupToken(botToken), userService, userApplicationService)
       handler = BotCommandHandler(botToken, httpBackend, userProgram)
     } yield handler
