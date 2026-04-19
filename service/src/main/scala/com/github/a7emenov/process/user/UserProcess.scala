@@ -50,7 +50,7 @@ object UserProcess:
     sealed abstract class SetupAdmin(message: String, cause: Option[Throwable]) extends Error(message, cause)
 
     object SetupAdmin:
-      case object WrongToken extends UserProcess.Error.SetupAdmin(show"Wrong setup token", none)
+      case object InvalidToken extends UserProcess.Error.SetupAdmin(show"Invalid setup token", none)
       case object AlreadyExists
           extends UserProcess.Error.SetupAdmin(show"An admin account already exists", none)
 
