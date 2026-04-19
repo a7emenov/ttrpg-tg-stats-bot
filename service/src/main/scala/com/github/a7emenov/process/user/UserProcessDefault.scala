@@ -43,7 +43,7 @@ class UserProcessDefault[F[_]: MonadCancelThrow](
               }
           )
         else
-          (state, UserProcess.Error.SetupAdmin.WrongToken.asLeft[User].pure[F])
+          (state, UserProcess.Error.SetupAdmin.InvalidToken.asLeft[User].pure[F])
 
       case None =>
         (None, UserProcess.Error.SetupAdmin.AlreadyExists.asLeft[User].pure[F])

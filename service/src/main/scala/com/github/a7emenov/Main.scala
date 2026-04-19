@@ -4,7 +4,6 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.effect.Resource
 import com.github.a7emenov.api.telegram.BotCommandHandler
 import com.github.a7emenov.config.ApplicationConfig
-import com.github.a7emenov.domain.util.Secret
 import com.github.a7emenov.process.user.UserProcess
 import com.github.a7emenov.service.user.UserService
 import com.github.a7emenov.service.userapplication.UserApplicationService
