@@ -4,7 +4,9 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.effect.Resource
 import com.github.a7emenov.api.telegram.BotCommandHandler
 import com.github.a7emenov.config.ApplicationConfig
+import com.github.a7emenov.process.gamesession.GameSessionProcess
 import com.github.a7emenov.process.user.UserProcess
+import com.github.a7emenov.service.gamesession.GameSessionService
 import com.github.a7emenov.service.user.UserService
 import com.github.a7emenov.service.userapplication.UserApplicationService
 import sttp.client4.httpclient.cats.HttpClientCatsBackend
@@ -23,6 +25,8 @@ object Main extends IOApp:
       httpBackend            <- HttpClientCatsBackend.resource()
       userService            <- UserService.make[IO]
       userApplicationService <- UserApplicationService.make[IO]
-      userProgram            <- UserProcess.make(config.process.user, userService, userApplicationService)
-      handler = BotCommandHandler(config.bot.token, httpBackend, userProgram)
+      userProcess            <- UserProcess.make(config.process.user, userService, userApplicationService)
+      gameSessionService     <- GameSessionService.make[IO]
+      gameSessionProcess     <- GameSessionProcess.make(gameSessionService)
+      handler = BotCommandHandler(config.bot.token, httpBackend, userProcess, gameSessionProcess)
     } yield handler
