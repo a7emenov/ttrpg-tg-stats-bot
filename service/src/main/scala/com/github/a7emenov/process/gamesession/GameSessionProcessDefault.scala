@@ -2,12 +2,14 @@ package com.github.a7emenov.process.gamesession
 
 import cats.Functor
 import cats.effect.{Ref, Resource, Sync}
-import com.github.a7emenov.domain.game.{GameSession, SessionParticipant}
+import com.github.a7emenov.domain.gamesession.{GameSession, SessionParticipant}
 import com.github.a7emenov.process.gamesession
 import com.github.a7emenov.process.gamesession.GameSessionProcess
 import com.github.a7emenov.service.gamesession.GameSessionService
 import cats.syntax.either.*
 import cats.syntax.functor.*
+import com.github.a7emenov.domain.user.User
+import com.github.a7emenov.process.gamesession.GameSessionProcess.Error
 import com.github.a7emenov.process.gamesession.GameSessionProcessDefault.*
 
 class GameSessionProcessDefault[F[_]: Functor](
@@ -18,9 +20,14 @@ class GameSessionProcessDefault[F[_]: Functor](
     gameSessionService.record(session)
       .map(_.leftMap(toRecordError))
 
+  override def getByScribe(userId: User.Id)
+      : fs2.Stream[F, Either[GameSessionProcess.Error.Get, List[GameSession.WithId]]] =
+    gameSessionService.getByScribe(userId, chunkSize = 100)
+      .map(_.leftMap(toGetError))
+
   override def getByHost(host: SessionParticipant)
-      : F[Either[GameSessionProcess.Error.Get, Map[GameSession.Id, GameSession]]] =
-    gameSessionService.getByHost(host)
+      : fs2.Stream[F, Either[GameSessionProcess.Error.Get, List[GameSession.WithId]]] =
+    gameSessionService.getByHost(host, chunkSize = 100)
       .map(_.leftMap(toGetError))
 
 object GameSessionProcessDefault:

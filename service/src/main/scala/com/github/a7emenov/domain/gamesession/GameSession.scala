@@ -1,4 +1,4 @@
-package com.github.a7emenov.domain.game
+package com.github.a7emenov.domain.gamesession
 
 import java.time.{LocalDate, LocalDateTime}
 import java.time.temporal.ChronoUnit
@@ -8,18 +8,19 @@ import scala.concurrent.duration.FiniteDuration
 
 import cats.data.NonEmptyList
 import cats.syntax.option.*
+import com.github.a7emenov.domain.user.User
 
 /** A representation of a recorded game session.
- *  Some root fields are optional to indicate whether they were provided by the user.
- *  Session are not intended to be recorded without non-optional fields.
+ *  Optional fields indicate whether they were provided by the user.
  */
 case class GameSession(
     genres: Option[NonEmptyList[GameGenre]],
     system: Option[GameSystem],
     gameType: Option[GameType],
-    hosts: NonEmptyList[SessionParticipant],
+    scribe: User,
+    hosts: Option[NonEmptyList[SessionParticipant]],
     players: Option[GameSession.Players],
-    timeframe: GameSession.Timeframe,
+    timeframe: Option[GameSession.Timeframe],
     storyArcData: Option[GameSession.StoryArcData],
     deathData: Option[GameSession.DeathData]
 )

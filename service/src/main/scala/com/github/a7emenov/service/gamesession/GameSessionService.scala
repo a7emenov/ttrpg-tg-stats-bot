@@ -1,15 +1,24 @@
 package com.github.a7emenov.service.gamesession
 
 import cats.effect.{Resource, Sync}
-import com.github.a7emenov.domain.game.{GameSession, SessionParticipant}
+import com.github.a7emenov.domain.gamesession.{GameSession, SessionParticipant}
 import com.github.a7emenov.service.gamesession
 import cats.syntax.option.*
+import com.github.a7emenov.domain.user.User
 
 trait GameSessionService[F[_]]:
 
   def record(session: GameSession): F[Either[GameSessionService.Error.Record, GameSession.WithId]]
 
-  def getByHost(host: SessionParticipant): F[Either[GameSessionService.Error.Get, Map[GameSession.Id, GameSession]]]
+  def getByScribe(
+      userId: User.Id,
+      chunkSize: Int
+  ): fs2.Stream[F, Either[GameSessionService.Error.Get, List[GameSession.WithId]]]
+
+  def getByHost(
+      host: SessionParticipant,
+      chunkSize: Int
+  ): fs2.Stream[F, Either[GameSessionService.Error.Get, List[GameSession.WithId]]]
 
 object GameSessionService:
 

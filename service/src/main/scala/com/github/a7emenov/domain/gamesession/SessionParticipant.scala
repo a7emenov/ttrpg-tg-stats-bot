@@ -1,4 +1,4 @@
-package com.github.a7emenov.domain.game
+package com.github.a7emenov.domain.gamesession
 
 import com.github.a7emenov.domain.user.User
 
