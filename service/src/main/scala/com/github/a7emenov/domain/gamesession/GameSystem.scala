@@ -1,4 +1,4 @@
-package com.github.a7emenov.domain.game
+package com.github.a7emenov.domain.gamesession
 
 opaque type GameSystem = String
 
