@@ -13,7 +13,7 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with Callbacks[F] w
   protected def gameSessionProcess: GameSessionProcess[F]
 
   onCommand(BotCommand.RecordGameSession.name) { implicit command =>
-    withPermissions(UserPermission.RecordGameSessions) { user =>
+    withMessagePermissions(UserPermission.RecordGameSessions) { user =>
       val yesBtn = InlineKeyboardButton.callbackData(
         text = "Yes",
         cbd = makeCallbackData(CommandTag.IsUserHost, CommandCallbackData.IsHost.Yes)
