@@ -16,7 +16,7 @@ trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserCheck[F] {
   implicit val async: Async[F]
 
   onCommand(BotCommand.SetupAdmin.name) { implicit command =>
-    withCommandUserId { commandUserId =>
+    withMessageUserId { commandUserId =>
       withArgs { args =>
         val resultF = for {
           setupToken <-
@@ -37,13 +37,13 @@ trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserCheck[F] {
   }
 
   onCommand(BotCommand.CheckPermissions.name) { implicit command =>
-    withUser { commandUser =>
+    withMessageUser { commandUser =>
       reply(commandUser.permissions.mkString(",")).void
     }
   }
 
   onCommand(BotCommand.Apply.name) { implicit command =>
-    withCommandUserId { commandUserId =>
+    withMessageUserId { commandUserId =>
       withArgs { args =>
         val resultF = for {
           role <- EitherT.fromEither(args.headOption.map(_.toLowerCase()).fold(
@@ -70,7 +70,7 @@ trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserCheck[F] {
   }
 
   onCommand(BotCommand.ApproveUserApplication.name) { implicit command =>
-    withPermissions(UserPermission.InternalAccess) { commandUser =>
+    withMessagePermissions(UserPermission.InternalAccess) { commandUser =>
       withArgs { args =>
         val resultF = for {
           userId <- EitherT.fromOption(args.headOption.map(User.Id(_)), "provide a user id")
@@ -89,7 +89,7 @@ trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserCheck[F] {
   }
 
   onCommand(BotCommand.ListUserApplications.name) { implicit command =>
-    withPermissions(UserPermission.InternalAccess) { commandUser =>
+    withMessagePermissions(UserPermission.InternalAccess) { commandUser =>
       withArgs { args =>
         val resultF = for {
           result <- EitherT(userProcess.getUserApplications
