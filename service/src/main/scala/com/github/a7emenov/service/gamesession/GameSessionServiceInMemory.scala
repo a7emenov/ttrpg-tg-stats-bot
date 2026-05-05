@@ -28,7 +28,7 @@ class GameSessionServiceInMemory[F[_]: Functor](
         .map { sessions =>
           sessions
             .filter { case GameSession.WithId(_, session) =>
-              session.scribe.id == userId
+              session.scribe == userId
             }
         }.map(_.asRight[GameSessionService.Error.Get])
     )

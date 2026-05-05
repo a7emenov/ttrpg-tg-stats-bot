@@ -1,4 +1,4 @@
-package com.github.a7emenov.api.telegram
+package com.github.a7emenov.api.telegram.command
 
 enum BotCommand(val name: String):
   case SetupAdmin extends BotCommand("setup_admin")
@@ -7,3 +7,5 @@ enum BotCommand(val name: String):
   case ApproveUserApplication extends BotCommand("approve_user_application")
   case ListUserApplications extends BotCommand("list_user_applications")
   case RecordGameSession extends BotCommand("record")
+  case ListGames extends BotCommand("list_games")
+  case RemoveKeyboard extends BotCommand("remove_keyboard")

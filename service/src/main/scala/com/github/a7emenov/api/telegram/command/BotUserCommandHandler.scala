@@ -1,17 +1,18 @@
-package com.github.a7emenov.api.telegram
+package com.github.a7emenov.api.telegram.command
 
 import cats.data.EitherT
 import cats.effect.Async
-import com.bot4s.telegram.api.declarative.Commands
-import com.github.a7emenov.domain.user.{User, UserPermission, UserRole}
-import com.github.a7emenov.process.user.UserProcess
 import cats.syntax.applicativeError.*
 import cats.syntax.either.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.show.*
+import com.bot4s.telegram.api.declarative.Commands
+import com.github.a7emenov.api.telegram.util.BotUserHandler
+import com.github.a7emenov.domain.user.{User, UserPermission, UserRole}
+import com.github.a7emenov.process.user.UserProcess
 
-trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserCheck[F] {
+trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserHandler[F] {
 
   implicit val async: Async[F]
 

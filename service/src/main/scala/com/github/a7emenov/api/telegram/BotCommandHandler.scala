@@ -2,6 +2,7 @@ package com.github.a7emenov.api.telegram
 
 import cats.effect.Async
 import com.bot4s.telegram.cats.{Polling, TelegramBot}
+import com.github.a7emenov.api.telegram.command.{BotGameSessionCommandHandler, BotUserCommandHandler}
 import com.github.a7emenov.domain.util.Secret
 import com.github.a7emenov.process.gamesession.GameSessionProcess
 import com.github.a7emenov.process.user.UserProcess
