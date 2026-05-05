@@ -8,13 +8,12 @@ trait BotCallbackHandler[F[_]] extends Callbacks[F]:
 
   val callbackHandlerTag: BotCommandCallbackData.HandlerTag
 
-  /** Processes only callbacks for a given command tag (for callback data created through [[makeCallbackData]]).
-   *  Callback query can be referenced in the anonymous function using `summon[CallbackQuery]`.
+  /** Processes only callbacks for a given callback tag (for callback data created through [[makeCallbackData]]).
    */
-  def onCommandCallback(commandTag: String)(actionT: CallbackQuery => Action[F, List[String]]): Unit =
+  def onCallbackTag(callbackTag: String)(actionT: CallbackQuery => Action[F, List[String]]): Unit =
     onCallbackQuery { implicit query =>
       query.data match {
-        case Some(BotCommandCallbackData(`callbackHandlerTag`, `commandTag`, data)) =>
+        case Some(BotCommandCallbackData(`callbackHandlerTag`, `callbackTag`, data)) =>
           actionT(query)(data)
 
         case Some(_) | None =>
@@ -30,9 +29,9 @@ trait BotCallbackHandler[F[_]] extends Callbacks[F]:
         ().pure[F]
     }
 
-  def makeCallbackData(commandTag: String, data: String*): String =
+  def makeCallbackData(callbackTag: String, data: String*): String =
     BotCommandCallbackData(
       handlerTag = callbackHandlerTag,
-      commandTag = commandTag,
+      callbackTag = callbackTag,
       data = data*
     )

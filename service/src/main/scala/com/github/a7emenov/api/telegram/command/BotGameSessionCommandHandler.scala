@@ -2,23 +2,16 @@ package com.github.a7emenov.api.telegram.command
 
 import cats.data.EitherT
 import cats.effect.Async
-import cats.syntax.applicative.*
 import cats.syntax.applicativeError.*
 import cats.syntax.either.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
 import cats.syntax.show.*
-import com.bot4s.telegram.api.declarative.{Callbacks, Commands}
-import com.bot4s.telegram.models.{
-  CallbackQuery,
-  InlineKeyboardButton,
-  InlineKeyboardMarkup,
-  ReplyKeyboardMarkup,
-  ReplyKeyboardRemove
-}
-import BotGameSessionCommandHandler.*
+import com.bot4s.telegram.api.declarative.Commands
+import com.bot4s.telegram.models.{InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove}
 import com.github.a7emenov.api.telegram.callback.{BotCallbackHandler, BotCommandCallbackData}
+import com.github.a7emenov.api.telegram.command.BotGameSessionCommandHandler.*
 import com.github.a7emenov.api.telegram.util.BotUserHandler
 import com.github.a7emenov.domain.gamesession.GameSession
 import com.github.a7emenov.domain.user.{User, UserPermission}
@@ -37,11 +30,11 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with BotCallbackHan
     withMessagePermissions(UserPermission.RecordGameSessions) { user =>
       val yesBtn = InlineKeyboardButton.callbackData(
         text = "Yes",
-        cbd = makeCallbackData(CommandTag.IsUserHost.value, CommandCallbackData.IsHost.Yes)
+        cbd = makeCallbackData(CallbackTag.IsUserHost.value, CommandCallbackData.IsHost.Yes)
       )
       val noBtn = InlineKeyboardButton.callbackData(
         text = "No",
-        cbd = makeCallbackData(CommandTag.IsUserHost.value, CommandCallbackData.IsHost.No)
+        cbd = makeCallbackData(CallbackTag.IsUserHost.value, CommandCallbackData.IsHost.No)
       )
       val markup = InlineKeyboardMarkup(Seq(Seq(yesBtn), Seq(noBtn)))
       reply("Are you a host?", replyMarkup = markup.some).void
@@ -68,7 +61,7 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with BotCallbackHan
     reply("Keyboard removed", replyMarkup = ReplyKeyboardRemove(removeKeyboard = true).some).void
   }
 
-  onCommandCallback(CommandTag.IsUserHost.value) { implicit query =>
+  onCallbackTag(CallbackTag.IsUserHost.value) { implicit query =>
     { (data: List[String]) =>
       withCallbackMessage { implicit message =>
         (data match {
@@ -111,8 +104,8 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with BotCallbackHan
 
 object BotGameSessionCommandHandler:
 
-  private enum CommandTag:
-    case IsUserHost extends CommandTag
+  private enum CallbackTag:
+    case IsUserHost extends CallbackTag
 
     val value: String =
       this.ordinal.toString
