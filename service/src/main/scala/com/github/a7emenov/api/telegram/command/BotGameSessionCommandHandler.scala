@@ -10,17 +10,20 @@ import cats.syntax.option.*
 import cats.syntax.show.*
 import com.bot4s.telegram.api.declarative.Commands
 import com.bot4s.telegram.models.{InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove}
-import com.github.a7emenov.api.telegram.callback.{BotCallbackHandler, BotCommandCallbackData}
+import com.github.a7emenov.api.telegram.callbackdata.{BotCallbackData, BotCallbackDataHandler}
 import com.github.a7emenov.api.telegram.command.BotGameSessionCommandHandler.*
-import com.github.a7emenov.api.telegram.util.BotUserHandler
+import com.github.a7emenov.api.telegram.user.{BotCallbackUserHandler, BotMessageUserHandler}
 import com.github.a7emenov.domain.gamesession.GameSession
-import com.github.a7emenov.domain.user.{User, UserPermission}
+import com.github.a7emenov.domain.user.UserPermission
 import com.github.a7emenov.process.gamesession.GameSessionProcess
 
-trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with BotCallbackHandler[F] with BotUserHandler[F]:
+trait BotGameSessionCommandHandler[F[_]] extends Commands[F]
+    with BotMessageUserHandler[F]
+    with BotCallbackDataHandler[F]
+    with BotCallbackUserHandler[F]:
 
-  override val callbackHandlerTag: BotCommandCallbackData.HandlerTag =
-    BotCommandCallbackData.HandlerTag.GameSession
+  override val callbackHandlerTag: BotCallbackData.HandlerTag =
+    BotCallbackData.HandlerTag.GameSession
 
   protected implicit val async: Async[F]
 
@@ -57,47 +60,45 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F] with BotCallbackHan
     }
   }
 
-  onCommand(BotCommand.RemoveKeyboard.name) { implicit command =>
-    reply("Keyboard removed", replyMarkup = ReplyKeyboardRemove(removeKeyboard = true).some).void
-  }
-
   onCallbackTag(CallbackTag.IsUserHost.value) { implicit query =>
     { (data: List[String]) =>
       withCallbackMessage { implicit message =>
-        (data match {
-          case List(CommandCallbackData.IsHost.Yes) =>
-            for {
-              recordResult <- gameSessionProcess.record(
-                GameSession.newSession(scribeUserId = User.Id(query.from.id.toString))
-              ).recover { case e =>
-                GameSessionProcess.Error.Record.System("Unknown game record error", e).asLeft
-              }
-              result <- recordResult match {
-                case Left(e) =>
-                  ackCallback(text = e.getMessage.some)
-                case Right(game) =>
-                  ackCallback(text = s"Created game with id and yes host ${game.id}".some)
-                    >> reply("Test reply yes").as(true)
-              }
-            } yield result
-          case List(CommandCallbackData.IsHost.No) =>
-            for {
-              recordResult <- gameSessionProcess.record(
-                GameSession.newSession(scribeUserId = User.Id(query.from.id.toString))
-              ).recover { case e =>
-                GameSessionProcess.Error.Record.System("Unknown game record error", e).asLeft
-              }
-              result <- recordResult match {
-                case Left(e) =>
-                  ackCallback(text = e.getMessage.some)
-                case Right(game) =>
-                  ackCallback(text = s"Created game with id and no host ${game.id}".some)
-                    >> reply("Test reply yes").as(true)
-              }
-            } yield result
-          case _ =>
-            ackCallback(text = "Invalid callback data".some)
-        }).void
+        withCallbackPermissions(UserPermission.RecordGameSessions) { user =>
+          (data match {
+            case List(CommandCallbackData.IsHost.Yes) =>
+              for {
+                recordResult <- gameSessionProcess.record(
+                  GameSession.newSession(scribeUserId = user.id)
+                ).recover { case e =>
+                  GameSessionProcess.Error.Record.System("Unknown game record error", e).asLeft
+                }
+                result <- recordResult match {
+                  case Left(e) =>
+                    ackCallback(text = e.getMessage.some)
+                  case Right(game) =>
+                    ackCallback(text = s"Created game with id and yes host ${game.id}".some)
+                      >> reply("Test reply yes").as(true)
+                }
+              } yield result
+            case List(CommandCallbackData.IsHost.No) =>
+              for {
+                recordResult <- gameSessionProcess.record(
+                  GameSession.newSession(scribeUserId = user.id)
+                ).recover { case e =>
+                  GameSessionProcess.Error.Record.System("Unknown game record error", e).asLeft
+                }
+                result <- recordResult match {
+                  case Left(e) =>
+                    ackCallback(text = e.getMessage.some)
+                  case Right(game) =>
+                    ackCallback(text = s"Created game with id and no host ${game.id}".some)
+                      >> reply("Test reply no").as(true)
+                }
+              } yield result
+            case _ =>
+              ackCallback(text = "Invalid callback data".some)
+          }).void
+        }
       }
     }
   }

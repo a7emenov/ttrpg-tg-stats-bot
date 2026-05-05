@@ -8,11 +8,11 @@ import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.show.*
 import com.bot4s.telegram.api.declarative.Commands
-import com.github.a7emenov.api.telegram.util.BotUserHandler
+import com.github.a7emenov.api.telegram.user.BotMessageUserHandler
 import com.github.a7emenov.domain.user.{User, UserPermission, UserRole}
 import com.github.a7emenov.process.user.UserProcess
 
-trait BotUserCommandHandler[F[_]] extends Commands[F] with BotUserHandler[F] {
+trait BotUserCommandHandler[F[_]] extends Commands[F] with BotMessageUserHandler[F] {
 
   implicit val async: Async[F]
 

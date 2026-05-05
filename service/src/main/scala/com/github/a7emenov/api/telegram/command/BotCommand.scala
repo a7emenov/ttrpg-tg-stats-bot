@@ -8,4 +8,3 @@ enum BotCommand(val name: String):
   case ListUserApplications extends BotCommand("list_user_applications")
   case RecordGameSession extends BotCommand("record")
   case ListGames extends BotCommand("list_games")
-  case RemoveKeyboard extends BotCommand("remove_keyboard")
