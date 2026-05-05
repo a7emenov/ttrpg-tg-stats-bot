@@ -1,15 +1,14 @@
-package com.github.a7emenov.api.telegram
+package com.github.a7emenov.api.telegram.util
 
 import cats.data.NonEmptySet
-import com.bot4s.telegram.api.declarative.{Action, Messages}
-import com.bot4s.telegram.models.Message
-import com.bot4s.telegram.models.User as BotUser
-import com.github.a7emenov.domain.user.{User, UserPermission}
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
+import com.bot4s.telegram.api.declarative.{Action, Messages}
+import com.bot4s.telegram.models.{Message, User as BotUser}
+import com.github.a7emenov.domain.user.{User, UserPermission}
 import com.github.a7emenov.process.user.UserProcess
 
-trait BotUserCheck[F[_]] extends Messages[F] {
+trait BotUserHandler[F[_]] extends Messages[F] {
 
   protected def userProcess: UserProcess[F]
 

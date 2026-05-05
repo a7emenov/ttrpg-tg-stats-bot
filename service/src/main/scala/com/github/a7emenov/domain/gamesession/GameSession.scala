@@ -17,7 +17,7 @@ case class GameSession(
     genres: Option[NonEmptyList[GameGenre]],
     system: Option[GameSystem],
     gameType: Option[GameType],
-    scribe: User,
+    scribe: User.Id,
     hosts: Option[NonEmptyList[SessionParticipant]],
     players: Option[GameSession.Players],
     timeframe: Option[GameSession.Timeframe],
@@ -26,6 +26,19 @@ case class GameSession(
 )
 
 object GameSession:
+
+  def newSession(scribeUserId: User.Id): GameSession =
+    GameSession(
+      genres = none,
+      system = none,
+      gameType = none,
+      scribe = scribeUserId,
+      hosts = none,
+      players = none,
+      timeframe = none,
+      storyArcData = none,
+      deathData = none
+    )
 
   case class WithId(id: GameSession.Id, session: GameSession)
 
