@@ -60,10 +60,6 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F]
     }
   }
 
-  onCommand(BotCommand.RemoveKeyboard.name) { implicit command =>
-    reply("Keyboard removed", replyMarkup = ReplyKeyboardRemove(removeKeyboard = true).some).void
-  }
-
   onCallbackTag(CallbackTag.IsUserHost.value) { implicit query =>
     { (data: List[String]) =>
       withCallbackMessage { implicit message =>
