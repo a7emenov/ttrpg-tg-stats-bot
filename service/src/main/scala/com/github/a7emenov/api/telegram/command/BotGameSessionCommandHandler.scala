@@ -74,7 +74,7 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F]
                 }
                 result <- recordResult match {
                   case Left(e) =>
-                    ackCallback(text = e.getMessage.some)
+                    ackCallback(text = e.message.some)
                   case Right(game) =>
                     ackCallback(text = s"Created game with id and yes host ${game.id}".some)
                       >> reply("Test reply yes").as(true)
@@ -89,7 +89,7 @@ trait BotGameSessionCommandHandler[F[_]] extends Commands[F]
                 }
                 result <- recordResult match {
                   case Left(e) =>
-                    ackCallback(text = e.getMessage.some)
+                    ackCallback(text = e.message.some)
                   case Right(game) =>
                     ackCallback(text = s"Created game with id and no host ${game.id}".some)
                       >> reply("Test reply no").as(true)

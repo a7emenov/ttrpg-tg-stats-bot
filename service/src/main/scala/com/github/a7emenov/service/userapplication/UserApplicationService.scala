@@ -4,6 +4,7 @@ import cats.effect.{Resource, Sync}
 import cats.syntax.option.*
 import cats.syntax.show.*
 import com.github.a7emenov.domain.user.{User, UserApplication, UserRole}
+import com.github.a7emenov.util.error.AppError
 
 trait UserApplicationService[F[_]]:
 
@@ -20,27 +21,32 @@ object UserApplicationService:
   def make[F[_]: Sync]: Resource[F, UserApplicationService[F]] =
     UserApplicationServiceInMemory.make
 
-  sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
+  sealed abstract class Error(message: String, cause: Option[Throwable])
+      extends AppError(message, cause)
 
   object Error:
-    sealed abstract class Create(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Create(message: String, cause: Option[Throwable])
+        extends UserApplicationService.Error(message, cause)
 
     object Create:
-      case class AlreadyExists(id: User.Id)
+      final case class AlreadyExists(id: User.Id)
           extends UserApplicationService.Error.Create(show"User with id $id already exists", none)
-      case class System(message: String, cause: Throwable)
+      final case class System(override val message: String, cause: Throwable)
           extends UserApplicationService.Error.Create(message, cause.some)
 
-    sealed abstract class Get(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Get(message: String, cause: Option[Throwable])
+        extends UserApplicationService.Error(message, cause)
 
     object Get:
-      case class System(message: String, cause: Throwable) extends UserApplicationService.Error.Get(message, cause.some)
+      final case class System(override val message: String, cause: Throwable)
+          extends UserApplicationService.Error.Get(message, cause.some)
 
-    sealed abstract class Delete(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Delete(message: String, cause: Option[Throwable])
+        extends UserApplicationService.Error(message, cause)
 
     object Delete:
-      case class NotFound(id: User.Id)
+      final case class NotFound(id: User.Id)
           extends UserApplicationService.Error.Delete(show"Application for user $id not found", none)
 
-      case class System(message: String, cause: Throwable)
+      final case class System(override val message: String, cause: Throwable)
           extends UserApplicationService.Error.Delete(message, cause.some)
