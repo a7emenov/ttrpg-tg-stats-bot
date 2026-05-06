@@ -9,6 +9,7 @@ import com.github.a7emenov.domain.util.Secret
 import com.github.a7emenov.process.user
 import com.github.a7emenov.service.user.UserService
 import com.github.a7emenov.service.userapplication.UserApplicationService
+import com.github.a7emenov.util.error.AppError
 
 trait UserProcess[F[_]]:
 
@@ -44,38 +45,44 @@ object UserProcess:
     extension (token: UserProcess.SetupToken)
       def value: Secret = token
 
-  sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
+  sealed abstract class Error(message: String, cause: Option[Throwable])
+      extends AppError(message, cause)
 
   object Error:
-    sealed abstract class SetupAdmin(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class SetupAdmin(message: String, cause: Option[Throwable])
+        extends UserProcess.Error(message, cause)
 
     object SetupAdmin:
-      case object InvalidToken extends UserProcess.Error.SetupAdmin(show"Invalid setup token", none)
+      case object InvalidToken
+          extends UserProcess.Error.SetupAdmin(show"Invalid setup token", none)
       case object AlreadyExists
           extends UserProcess.Error.SetupAdmin(show"An admin account already exists", none)
+      final case class System(override val message: String, cause: Throwable)
+          extends UserProcess.Error.SetupAdmin(message, cause.some)
 
-      case class System(message: String, cause: Throwable) extends UserProcess.Error.SetupAdmin(message, cause.some)
-
-    sealed abstract class Apply(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Apply(message: String, cause: Option[Throwable])
+        extends UserProcess.Error(message, cause)
 
     object Apply:
-      case class UserAlreadyExists(id: User.Id)
+      final case class UserAlreadyExists(id: User.Id)
           extends UserProcess.Error.Apply(show"User with id $id already exists", none)
-      case class ApplicationAlreadyExists(id: User.Id)
+      final case class ApplicationAlreadyExists(id: User.Id)
           extends UserProcess.Error.Apply(show"Application for user with id $id already exists", none)
-      case class System(message: String, cause: Throwable)
+      final case class System(override val message: String, cause: Throwable)
           extends UserProcess.Error.Apply(message, cause.some)
 
-    sealed abstract class ApproveApplication(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class ApproveApplication(message: String, cause: Option[Throwable])
+        extends UserProcess.Error(message, cause)
 
     object ApproveApplication:
-      case class NotFound(id: User.Id)
+      final case class NotFound(id: User.Id)
           extends UserProcess.Error.ApproveApplication(show"Application for user $id not found", none)
-
-      case class System(message: String, cause: Throwable)
+      final case class System(override val message: String, cause: Throwable)
           extends UserProcess.Error.ApproveApplication(message, cause.some)
 
-    sealed abstract class Get(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Get(message: String, cause: Option[Throwable])
+        extends UserProcess.Error(message, cause)
 
     object Get:
-      case class System(message: String, cause: Throwable) extends UserProcess.Error.Get(message, cause.some)
+      case class System(override val message: String, cause: Throwable)
+          extends UserProcess.Error.Get(message, cause.some)

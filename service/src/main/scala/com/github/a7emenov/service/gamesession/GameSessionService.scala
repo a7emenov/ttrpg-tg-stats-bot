@@ -5,6 +5,7 @@ import com.github.a7emenov.domain.gamesession.{GameSession, SessionParticipant}
 import com.github.a7emenov.service.gamesession
 import cats.syntax.option.*
 import com.github.a7emenov.domain.user.User
+import com.github.a7emenov.util.error.AppError
 
 trait GameSessionService[F[_]]:
 
@@ -25,15 +26,20 @@ object GameSessionService:
   def make[F[_]: Sync]: Resource[F, GameSessionService[F]] =
     GameSessionServiceInMemory.make
 
-  sealed abstract class Error(message: String, cause: Option[Throwable]) extends Exception(message, cause.orNull)
+  sealed abstract class Error(message: String, cause: Option[Throwable])
+      extends AppError(message, cause)
 
   object Error:
-    sealed abstract class Record(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Record(message: String, cause: Option[Throwable])
+        extends GameSessionService.Error(message, cause)
 
     object Record:
-      case class System(message: String, cause: Throwable) extends GameSessionService.Error.Record(message, cause.some)
+      final case class System(override val message: String, cause: Throwable)
+          extends GameSessionService.Error.Record(message, cause.some)
 
-    sealed abstract class Get(message: String, cause: Option[Throwable]) extends Error(message, cause)
+    sealed abstract class Get(message: String, cause: Option[Throwable])
+        extends GameSessionService.Error(message, cause)
 
     object Get:
-      case class System(message: String, cause: Throwable) extends GameSessionService.Error.Get(message, cause.some)
+      final case class System(override val message: String, cause: Throwable)
+          extends GameSessionService.Error.Get(message, cause.some)
