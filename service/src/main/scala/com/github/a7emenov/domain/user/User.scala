@@ -1,6 +1,6 @@
 package com.github.a7emenov.domain.user
 
-import cats.Show
+import cats.{Order, Show}
 
 /** Represents a user registered to use the bot.
  *  All game session participants are represented by [[SessionParticipant]] instead.
@@ -26,6 +26,9 @@ object User:
 
     implicit val show: Show[User.Id] =
       Show.show(_.value)
+
+    implicit val order: Order[User.Id] =
+      Order.fromOrdering
 
     def apply(value: String): User.Id =
       value

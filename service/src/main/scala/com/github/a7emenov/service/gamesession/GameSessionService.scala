@@ -16,11 +16,6 @@ trait GameSessionService[F[_]]:
       chunkSize: Int
   ): fs2.Stream[F, Either[GameSessionService.Error.Get, List[GameSession.WithId]]]
 
-  def getByHost(
-      host: SessionParticipant,
-      chunkSize: Int
-  ): fs2.Stream[F, Either[GameSessionService.Error.Get, List[GameSession.WithId]]]
-
 object GameSessionService:
 
   def make[F[_]: Sync]: Resource[F, GameSessionService[F]] =
