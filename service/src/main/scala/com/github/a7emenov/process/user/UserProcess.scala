@@ -25,6 +25,7 @@ trait UserProcess[F[_]]:
 
 object UserProcess:
 
+  // todo: caching interpreter for retrieving user in message handlers
   def make[F[_]: Sync](
       config: UserProcessConfig,
       userService: UserService[F],

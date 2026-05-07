@@ -1,18 +1,15 @@
 package com.github.a7emenov.process.dialoguestate
 
 import cats.Functor
-import cats.effect.{Ref, Resource, Sync}
+import cats.effect.Resource
 import cats.syntax.either.*
 import cats.syntax.functor.*
 import com.github.a7emenov.domain.dialoguestate.DialogueState
-import com.github.a7emenov.domain.gamesession.GameSession
-import com.github.a7emenov.domain.user.{User, UserRole}
+import com.github.a7emenov.domain.user.User
 import com.github.a7emenov.process.dialoguestate
-import com.github.a7emenov.process.gamesession.GameSessionProcess
+import com.github.a7emenov.process.dialoguestate.DialogueStateProcessDefault.*
 import com.github.a7emenov.service
 import com.github.a7emenov.service.dialoguestate.DialogueStateService
-import com.github.a7emenov.service.gamesession.GameSessionService
-import DialogueStateProcessDefault.*
 
 class DialogueStateProcessDefault[F[_]: Functor](
     dialogueStateService: DialogueStateService[F],

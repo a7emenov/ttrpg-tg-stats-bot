@@ -18,15 +18,39 @@ trait BotDialogueStateHandler[F[_]]:
   // todo: ensure this locks the state during processing.
   /** Proceeds only on state matched by the partial function. Non-matching states are ignored.
    *  New state returned from `action` is automatically updated.
+   *
+   *  Dependent state transitions should be handled within a single message/callback handler to avoid cases
+   *  when a message is handled twice, i.e.
+   *  onMessage {
+   *   onDialogueState {
+   *     case state A => transition to state B
+   *     case state B => transition to state C
+   *   }
+   *  }
+   *
+   *  and not
+   *  onMessage {
+   *   onDialogueState {
+   *     case state A => transition to state B
+   *   }
+   *  }
+   *
+   *  onMessage {
+   *   onDialogueState {
+   *     case state B => transition to state C
+   *   }
+   *  }
    */
   def onDialogueState(userId: User.Id)(action: PartialFunction[
     DialogueState,
     F[DialogueState]
   ])(onError: Action[F, DialogueStateProcess.Error.Get] = _ => ().pure[F]): F[Unit] =
-    dialogueStateProcess.get(userId).map {
+    dialogueStateProcess.get(userId).flatMap {
       case Right(state) =>
         if action.isDefinedAt(state) then
-          action(state) >> dialogueStateProcess.update(userId, state)
+          action(state)
+            .flatMap(dialogueStateProcess.update(userId, _))
+            .void
         else
           ().pure[F]
 

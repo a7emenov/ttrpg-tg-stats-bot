@@ -4,4 +4,4 @@ package com.github.a7emenov.domain.gamesession
  *  Its primary purpose is to be used to identify additional data to be provided.
  */
 enum GameType:
-  case Standard, MultiHostEvent
+  case Standard, Event
