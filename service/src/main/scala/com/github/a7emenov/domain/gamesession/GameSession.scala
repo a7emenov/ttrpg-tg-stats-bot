@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, NonEmptySet}
 import cats.syntax.option.*
 import com.github.a7emenov.domain.user.User
 
@@ -14,33 +14,34 @@ import com.github.a7emenov.domain.user.User
  *  Optional fields indicate whether they were provided by the user.
  */
 case class GameSession(
-    genres: Option[NonEmptyList[GameGenre]],
-    system: Option[GameSystem],
-    gameType: Option[GameType],
-    scribe: User.Id,
-    hosts: Option[NonEmptyList[SessionParticipant]],
-    players: Option[GameSession.Players],
-    timeframe: Option[GameSession.Timeframe],
+    requiredData: GameSession.RequiredData,
+    coreData: Option[GameSession.CoreData],
     storyArcData: Option[GameSession.StoryArcData],
     deathData: Option[GameSession.DeathData]
 )
 
 object GameSession:
 
-  def newSession(scribeUserId: User.Id): GameSession =
+  def newSession(
+      scribe: SessionParticipant.WithId,
+      name: GameSession.GameName,
+      timeframe: Timeframe,
+      gameType: GameType
+  ): GameSession =
     GameSession(
-      genres = none,
-      system = none,
-      gameType = none,
-      scribe = scribeUserId,
-      hosts = none,
-      players = none,
-      timeframe = none,
+      requiredData = GameSession.RequiredData(
+        name = name,
+        scribes = NonEmptySet.one(scribe.id),
+        hosts = NonEmptyList.one(scribe),
+        timeframe = timeframe,
+        gameType = gameType
+      ),
+      coreData = none,
       storyArcData = none,
       deathData = none
     )
 
-  case class WithId(id: GameSession.Id, session: GameSession)
+  final case class WithId(id: GameSession.Id, session: GameSession)
 
   /** An artificial unique identifier for a game session.
    */
@@ -53,12 +54,40 @@ object GameSession:
     extension (id: GameSession.Id)
       def value: String = id
 
+  final case class RequiredData(
+      name: GameSession.GameName,
+      scribes: NonEmptySet[User.Id],
+      hosts: NonEmptyList[SessionParticipant],
+      timeframe: GameSession.Timeframe,
+      gameType: GameType
+  )
+
+  final case class CoreData(
+      genres: Option[NonEmptyList[GameGenre]],
+      system: Option[GameSystem],
+      players: Option[GameSession.Players],
+
+  )
+
+  final case class StoryArcData(arc: Option[GameStoryArc], sessionNumber: Option[GameStoryArc.SessionNumber])
+
+  final case class DeathData(deadCharactersCount: Option[Int], playersWithDeadCharactersCount: Option[Int])
+
+  opaque type GameName = String
+
+  object GameName:
+    def apply(value: String): GameName =
+      value
+
+    extension (system: GameName)
+      def value: String = system
+
   sealed trait Players:
     def count: Int
 
   object Players:
-    case class CountOnly(count: Int) extends Players
-    case class NameList(nonEmptyList: NonEmptyList[SessionParticipant]) extends Players:
+    final case class CountOnly(count: Int) extends Players
+    final case class NameList(nonEmptyList: NonEmptyList[SessionParticipant]) extends Players:
       override def count: Int = nonEmptyList.size
 
   sealed trait Timeframe:
@@ -67,7 +96,7 @@ object GameSession:
     def duration: Option[FiniteDuration]
 
   object Timeframe:
-    case class DateOnly(date: LocalDate, duration: Option[FiniteDuration]) extends Timeframe
+    final case class DateOnly(date: LocalDate, duration: Option[FiniteDuration]) extends Timeframe
 
     sealed abstract case class Precise(start: LocalDateTime, end: LocalDateTime) extends Timeframe:
       override def date: LocalDate = start.toLocalDate
@@ -81,7 +110,3 @@ object GameSession:
           new GameSession.Timeframe.Precise(start, end) {}
         else
           new GameSession.Timeframe.Precise(end, start) {}
-
-  case class StoryArcData(arc: Option[GameStoryArc], sessionNumber: Option[GameStoryArc.SessionNumber])
-
-  case class DeathData(deadCharactersCount: Option[Int], playersWithDeadCharactersCount: Option[Int])

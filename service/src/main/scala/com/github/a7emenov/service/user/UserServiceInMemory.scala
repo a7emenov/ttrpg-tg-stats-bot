@@ -5,7 +5,6 @@ import cats.effect.{Ref, Sync}
 import cats.effect.Resource
 import com.github.a7emenov.domain.user.{User, UserRole}
 import cats.syntax.either.*
-import com.github.a7emenov.service.user.UserService.Error
 import cats.syntax.functor.*
 
 class UserServiceInMemory[F[_]: Functor](ref: Ref[F, Map[User.Id, User]]) extends UserService[F]:
@@ -19,7 +18,7 @@ class UserServiceInMemory[F[_]: Functor](ref: Ref[F, Map[User.Id, User]]) extend
         (map.updated(id, user), user.asRight)
     }
 
-  override def get(id: User.Id): F[Either[Error.Get, Option[User]]] =
+  override def get(id: User.Id): F[Either[UserService.Error.Get, Option[User]]] =
     ref.get.map { map =>
       map.get(id).asRight
     }

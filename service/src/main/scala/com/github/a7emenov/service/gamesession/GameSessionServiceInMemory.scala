@@ -28,21 +28,7 @@ class GameSessionServiceInMemory[F[_]: Functor](
         .map { sessions =>
           sessions
             .filter { case GameSession.WithId(_, session) =>
-              session.scribe == userId
-            }
-        }.map(_.asRight[GameSessionService.Error.Get])
-    )
-
-  def getByHost(host: SessionParticipant, chunkSize: Int)
-      : fs2.Stream[F, Either[GameSessionService.Error.Get, List[GameSession.WithId]]] =
-    fs2.Stream.eval(
-      ref.get
-        .map { sessions =>
-          sessions
-            .filter { case GameSession.WithId(_, session) =>
-              session.hosts.exists(_.exists { sessionHost =>
-                sessionHost.username == host.username || sessionHost.id.exists(host.id.contains)
-              })
+              session.requiredData.scribes.contains(userId)
             }
         }.map(_.asRight[GameSessionService.Error.Get])
     )

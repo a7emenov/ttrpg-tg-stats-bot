@@ -25,11 +25,6 @@ class GameSessionProcessDefault[F[_]: Functor](
     gameSessionService.getByScribe(userId, chunkSize = 100)
       .map(_.leftMap(toGetError))
 
-  override def getByHost(host: SessionParticipant)
-      : fs2.Stream[F, Either[GameSessionProcess.Error.Get, List[GameSession.WithId]]] =
-    gameSessionService.getByHost(host, chunkSize = 100)
-      .map(_.leftMap(toGetError))
-
 object GameSessionProcessDefault:
 
   def make[F[_]: Functor](gameSessionService: GameSessionService[F]): Resource[F, GameSessionProcess[F]] =

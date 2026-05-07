@@ -13,8 +13,6 @@ trait GameSessionProcess[F[_]]:
 
   def getByScribe(userId: User.Id): fs2.Stream[F, Either[GameSessionProcess.Error.Get, List[GameSession.WithId]]]
 
-  def getByHost(host: SessionParticipant): fs2.Stream[F, Either[GameSessionProcess.Error.Get, List[GameSession.WithId]]]
-
 object GameSessionProcess:
 
   def make[F[_]: Sync](service: GameSessionService[F]): Resource[F, GameSessionProcess[F]] =
