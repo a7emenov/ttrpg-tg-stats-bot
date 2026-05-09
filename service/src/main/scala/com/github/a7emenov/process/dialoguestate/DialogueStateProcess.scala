@@ -2,7 +2,6 @@ package com.github.a7emenov.process.dialoguestate
 
 import cats.effect.{Resource, Sync}
 import cats.syntax.option.*
-import cats.syntax.show.*
 import com.github.a7emenov.domain.dialoguestate.DialogueState
 import com.github.a7emenov.domain.user.User
 import com.github.a7emenov.service.dialoguestate.DialogueStateService

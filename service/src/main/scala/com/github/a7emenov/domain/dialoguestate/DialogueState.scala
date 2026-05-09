@@ -11,9 +11,23 @@ object DialogueState:
 
   case object Empty extends DialogueState
 
-  case class RecordingNewSession(
-      timeframe: Option[GameSession.Timeframe],
-      name: GameSession.GameName,
-      additionalHosts: Option[List[SessionParticipant]],
-      gameType: GameType
-  ) extends DialogueState
+  sealed trait RecordingNewSession extends DialogueState
+
+  object RecordingNewSession:
+
+    case object Timeframe
+        extends DialogueState.RecordingNewSession
+    final case class Name(
+        timeframe: GameSession.Timeframe
+    ) extends DialogueState.RecordingNewSession
+    final case class AdditionalHosts(
+        timeframe: GameSession.Timeframe,
+        name: GameSession.GameName,
+
+    ) extends DialogueState.RecordingNewSession
+
+    final case class GameType(
+        timeframe: GameSession.Timeframe,
+        name: GameSession.GameName,
+        additionalHosts: List[SessionParticipant]
+    ) extends DialogueState.RecordingNewSession
